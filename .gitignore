@@ -1,0 +1,7 @@
+.venv
+temp
+processed_videos_old
+vid_detect/processed_videos
+tests
+vin_diesel_full.mp4
+vin_diesel_full-proj.llc
