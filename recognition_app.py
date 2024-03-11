@@ -4,8 +4,9 @@ from pathlib import Path
 import torch
 import cv2
 from deepface import DeepFace
-from flask import Flask, jsonify, request
+from flask import Flask, request
 import json
+# from vid_recognise import vid_recognise
 
 model = YOLO("model.pt")
 
@@ -15,13 +16,16 @@ class Query:
         self.persons = []
         for person in persons:
             self.persons.append(person)
-
+            
 class Answer:
     def __init__(self, output_vid_name, logfile_name):
         self.output_vid_name = output_vid_name
-        self.logfile_name = logfile_name    
+        self.logfile_name = logfile_name  
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)  
 
-def recognise(query: Query) -> Answer:
+def vid_recognise(query: Query) -> Answer:
     
     vid_path = f"{query.vid_name}.mp4"
 
@@ -45,11 +49,11 @@ def recognise(query: Query) -> Answer:
             for target_name in target_names:
                 if name == target_name:
                     print(name)
-                    log.write(f"{time_signature}: {name} detected")
+                    log.write(f"{time_signature}: {name} detected \n")
                     return True
             return False
 
-    logfile_name = f"logfile_processed_{query.vid_name}_"
+    logfile_name = f"logfile_app_processed_{query.vid_name}"
     for person in query.persons:
         logfile_name += f"_{person}"
     logfile_name += ".txt"
@@ -84,13 +88,13 @@ def recognise(query: Query) -> Answer:
         else:
             break
         # testing condition, just for n first frames   
-        if i > 200:
+        if i > 10:
             break
 
         i += 1
             
     fps = capture.get(cv2.CAP_PROP_FPS)
-    procesessed_video_name = f"processed_{query.vid_name}_"
+    procesessed_video_name = f"processed_app_{query.vid_name}"
     for person in query.persons:
         procesessed_video_name += f"_{person}"
     procesessed_video_name += ".mp4"
@@ -112,10 +116,13 @@ recognition_app = Flask(__name__)
 @recognition_app.route('/recognise', methods=['GET'])
 def get_recognised(): 
     data = request.get_json()
-    loaded_data = json.loads(data)        
-    query = Query(loaded_data["vid_name"], loaded_data["persons"])
-    recognised = recognise(query)
-    return jsonify(recognised)
+    query = Query(data["vid_name"], data["persons"])
+    recognised = vid_recognise(query)
+    return recognised.toJSON()
+
+@recognition_app.route("/health")
+def healthcheck():
+    return "Recognition app is up!"
 
 
             
