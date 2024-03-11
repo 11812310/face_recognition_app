@@ -6,7 +6,6 @@ import cv2
 from deepface import DeepFace
 from flask import Flask, request
 import json
-# from vid_recognise import vid_recognise
 
 model = YOLO("model.pt")
 
@@ -14,16 +13,19 @@ class Query:
     def __init__(self, vid_name, persons):
         self.vid_name = vid_name
         self.persons = []
-        for person in persons:
-            self.persons.append(person)
-            
+        parsed_persons = json.loads(json.dumps(persons)) 
+        for person in parsed_persons:
+            parsed_person = json.loads(json.dumps(person))
+            print(parsed_person['person'])
+            self.persons.append(parsed_person['person'])
+
 class Answer:
     def __init__(self, output_vid_name, logfile_name):
         self.output_vid_name = output_vid_name
         self.logfile_name = logfile_name  
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__, 
-            sort_keys=True, indent=4)  
+            sort_keys=True, indent=4) 
 
 def vid_recognise(query: Query) -> Answer:
     
@@ -88,7 +90,7 @@ def vid_recognise(query: Query) -> Answer:
         else:
             break
         # testing condition, just for n first frames   
-        if i > 10:
+        if i > 200:
             break
 
         i += 1
