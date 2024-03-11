@@ -58,7 +58,6 @@ def vid_recognise(query: Query) -> Answer:
     logfile_name = f"logfile_app_processed_{query.vid_name}"
     for person in query.persons:
         logfile_name += f"_{person}"
-    logfile_name += ".txt"
     log = open(f"{logfile_name}.txt", "w") 
 
     processed_frames = []
