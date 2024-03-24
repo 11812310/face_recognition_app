@@ -6,6 +6,7 @@ import cv2
 from deepface import DeepFace
 from flask import Flask, request
 import json
+from minio import Minio
 
 model = YOLO("model.pt")
 
@@ -27,9 +28,11 @@ class Answer:
         return json.dumps(self, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4) 
 
-def vid_recognise(query: Query) -> Answer:
+def vid_recognise(query: Query, client) -> Answer:
     
+    # download the video on which the recognition will run from minio and save it locally
     vid_path = f"{query.vid_name}.mp4"
+    client.fget_object("original-videos-bucket", query.vid_name, vid_path)
 
     capture = cv2.VideoCapture(vid_path)
 
@@ -58,7 +61,8 @@ def vid_recognise(query: Query) -> Answer:
     logfile_name = f"logfile_app_processed_{query.vid_name}"
     for person in query.persons:
         logfile_name += f"_{person}"
-    log = open(f"{logfile_name}.txt", "w") 
+    logfile_path = logfile_name + ".txt"
+    log = open(f"{logfile_path}", "w") 
 
     processed_frames = []
     i = 0
@@ -98,27 +102,37 @@ def vid_recognise(query: Query) -> Answer:
     procesessed_video_name = f"processed_app_{query.vid_name}"
     for person in query.persons:
         procesessed_video_name += f"_{person}"
-    procesessed_video_name += ".mp4"
-    processed_video = cv2.VideoWriter(procesessed_video_name, cv2.VideoWriter_fourcc(*'MP4V'), fps, (1280,720))
+    procesessed_video_path = procesessed_video_name + ".mp4"
+    processed_video = cv2.VideoWriter(procesessed_video_path, cv2.VideoWriter_fourcc(*'MP4V'), fps, (1280,720))
 
     for f in processed_frames:
         processed_video.write(f)
 
     processed_video.release()
+    client.fput_object("processed-videos-bucket", procesessed_video_name, procesessed_video_path)
 
     log.close()
+    client.fput_object("logfiles-bucket", logfile_name, logfile_path)
 
     answer = Answer(procesessed_video_name, logfile_name)
 
     return(answer)
 
+def setup_minio():
+    client = Minio("play.min.io",
+        access_key="Q3AM3UQ867SPQQA43P2F",
+        secret_key="zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG",
+    )
+    return client
+
+minio_client = setup_minio()
 recognition_app = Flask(__name__)
 
 @recognition_app.route('/recognise', methods=['GET'])
 def get_recognised(): 
     data = request.get_json()
     query = Query(data["vid_name"], data["persons"])
-    recognised = vid_recognise(query)
+    recognised = vid_recognise(query, minio_client)
     return recognised.toJSON()
 
 @recognition_app.route("/health")
