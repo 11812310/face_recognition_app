@@ -1,6 +1,3 @@
-torch --install-option="--index-url https://download.pytorch.org/whl/cpu"
-torchvision --install-option="--index-url https://download.pytorch.org/whl/cpu"
-ultralytics --install-option="--no-deps"
 deepface
 flask
 pathlib
