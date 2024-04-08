@@ -47,7 +47,7 @@ def vid_recognise(query: Query) -> Answer:
     def recognise_face(time_signature, image_path, target_names): 
         dfs = DeepFace.find(img_path=image_path, db_path="database", enforce_detection=False) # possibly choose different model
         if dfs and len(dfs[0]['identity']) > 0:
-            name = dfs[0]['identity'].to_string(index=False).split('\\')[1]
+            name = dfs[0]['identity'].to_string(index=False).split('/')[1]
             for target_name in target_names:
                 if name == target_name:
                     print(name)
