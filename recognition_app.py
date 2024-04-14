@@ -32,7 +32,7 @@ def vid_recognise(query: Query, client) -> Answer:
     
     # download the video on which the recognition will run from minio and save it locally
     vid_path = f"{query.vid_name}.mp4"
-    client.fget_object("original-videos-bucket", query.vid_name, vid_path)
+    client.fget_object("k8s-minio-dev/original-videos-bucket", vid_path, vid_path)
 
     capture = cv2.VideoCapture(vid_path)
 
@@ -50,6 +50,7 @@ def vid_recognise(query: Query, client) -> Answer:
     def recognise_face(time_signature, image_path, target_names): 
         dfs = DeepFace.find(img_path=image_path, db_path="database", enforce_detection=False) # possibly choose different model
         if dfs and len(dfs[0]['identity']) > 0:
+            # TODO: check all detected names not just the first one detected 
             name = dfs[0]['identity'].to_string(index=False).split('/')[1]
             for target_name in target_names:
                 if name == target_name:
@@ -118,19 +119,21 @@ def vid_recognise(query: Query, client) -> Answer:
         processed_video.write(f)
 
     processed_video.release()
-    client.fput_object("processed-videos-bucket", procesessed_video_name, procesessed_video_path)
+    # TODO: check if the bucket exists and create it if it doesn't
+    client.fput_object("k8s-minio-dev/processed-videos-bucket", procesessed_video_path, procesessed_video_path)
 
     log.close()
-    client.fput_object("logfiles-bucket", logfile_name, logfile_path)
+    # TODO: check if the bucket exists and create it if it doesn't
+    client.fput_object("k8s-minio-dev/logfiles-bucket", logfile_path, logfile_path)
 
-    answer = Answer(procesessed_video_name, logfile_name)
+    answer = Answer(procesessed_video_path, logfile_path)
 
     return(answer)
 
 def setup_minio():
-    client = Minio("play.min.io",
-        access_key="Q3AM3UQ867SPQQA43P2F",
-        secret_key="zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG",
+    client = Minio("http://10.1.221.58:9000",
+        access_key="minioadmin",
+        secret_key="minioadmin"
     )
     return client
 
