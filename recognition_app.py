@@ -131,7 +131,7 @@ def vid_recognise(query: Query, client) -> Answer:
     return(answer)
 
 def setup_minio():
-    client = Minio("minio.minio-dev:9000",
+    client = Minio("minio:9000",
         access_key="minioadmin",
         secret_key="minioadmin"
     )
