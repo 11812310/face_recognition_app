@@ -32,7 +32,7 @@ def vid_recognise(query: Query, client) -> Answer:
     
     # download the video on which the recognition will run from minio and save it locally
     vid_path = f"{query.vid_name}.mp4"
-    client.fget_object("k8s-minio-dev/original-videos-bucket", vid_path, vid_path)
+    client.fget_object("original-videos-bucket", vid_path, vid_path)
 
     capture = cv2.VideoCapture(vid_path)
 
@@ -120,11 +120,11 @@ def vid_recognise(query: Query, client) -> Answer:
 
     processed_video.release()
     # TODO: check if the bucket exists and create it if it doesn't
-    client.fput_object("k8s-minio-dev/processed-videos-bucket", procesessed_video_path, procesessed_video_path)
+    client.fput_object("processed-videos-bucket", procesessed_video_path, procesessed_video_path)
 
     log.close()
     # TODO: check if the bucket exists and create it if it doesn't
-    client.fput_object("k8s-minio-dev/logfiles-bucket", logfile_path, logfile_path)
+    client.fput_object("logfiles-bucket", logfile_path, logfile_path)
 
     answer = Answer(procesessed_video_path, logfile_path)
 
