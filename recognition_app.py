@@ -133,7 +133,8 @@ def vid_recognise(query: Query, client) -> Answer:
 def setup_minio():
     client = Minio("minio:9000",
         access_key="minioadmin",
-        secret_key="minioadmin"
+        secret_key="minioadmin",
+        secure=False
     )
     return client
 
