@@ -14,4 +14,4 @@ COPY . .
 
 EXPOSE 5000
 
-CMD ["run_recognition_app.sh"]
+CMD ["/bin/sh", "-c", "run_recognition_app.sh"]
