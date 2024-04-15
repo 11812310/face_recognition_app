@@ -5,6 +5,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y libgl1 libgl1-mesa-glx libglib2.0-0 && apt-get clean
 
 COPY requirements.txt /app
+COPY run_recognition_app.sh /app
 
 RUN pip3 install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu 
 RUN pip3 install --no-cache-dir -r requirements.txt
@@ -14,4 +15,4 @@ COPY . .
 
 EXPOSE 5000
 
-CMD ["/bin/sh", "-c", "run_recognition_app.sh"]
+CMD ["/bin/sh", "-c", "/app/run_recognition_app.sh"]
