@@ -13,3 +13,4 @@ deepface
 flask
 pathlib
 minio
+urllib3

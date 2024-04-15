@@ -12,8 +12,6 @@ RUN pip3 install --no-cache-dir ultralytics --no-deps
 
 COPY . .
 
-RUN chmod +x run_recognition_app.sh
-
 EXPOSE 5000
 
-CMD ["/bin/sh", "-c", "/app/run_recognition_app.sh"]
+CMD [ "flask", "--app", "recognition_app", "run", "--host", "0.0.0.0"]
