@@ -14,4 +14,4 @@ COPY . .
 
 EXPOSE 5000
 
-CMD [ "flask", "--app", "recognition_app", "run", "--host", "0.0.0.0"]
+CMD ["run_recognition_app.sh"]
