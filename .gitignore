@@ -7,3 +7,4 @@ vin_diesel_full.mp4
 vin_diesel_full-proj.llc
 __pycache__/recognition_app.cpython-38.pyc
 __pycache__/test_rest.cpython-38.pyc
+database\representations_vgg_face.pkl
