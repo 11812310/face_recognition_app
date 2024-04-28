@@ -16,6 +16,8 @@ class Query:
         self.vid_name = vid_name
         self.persons = []
         parsed_persons = json.loads(json.dumps(persons)) 
+        print("PARSED PERSONS: ")
+        print(parsed_persons)
         for person in parsed_persons:
             parsed_person = json.loads(json.dumps(person))
             print(parsed_person['person'])
