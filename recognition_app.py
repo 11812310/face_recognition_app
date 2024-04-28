@@ -79,14 +79,14 @@ def vid_recognise(query: Query, client) -> Answer:
         if retval:
             timestamp = capture.get(cv2.CAP_PROP_POS_MSEC)
             processed_frame = frame.copy()
-            # if 2s have passed since the last detection
-            if (timestamp - timestamp_last_detection > 2000 or timestamp - timestamp_last_recognition > 5000):
+            # if 1s has passed since the last detection
+            if (timestamp - timestamp_last_detection > 1000 or timestamp - timestamp_last_recognition > 2500):
                     timestamp_last_detection = timestamp
                     # detect faces
                     results_frame = model(frame)
                     print(len(results_frame[0].boxes))
-                    # if the number of detected faces has changed since last detection or if 5s have passed since last recognition
-                    if (len(results_frame[0].boxes) != last_detection_no or timestamp - timestamp_last_recognition > 5000):
+                    # if the number of detected faces has changed since last detection or if 2.5s have passed since last recognition
+                    if (len(results_frame[0].boxes) != last_detection_no or timestamp - timestamp_last_recognition > 2500):
                         last_detection_no = len(results_frame[0].boxes)
                         timestamp_last_recognition = timestamp
                         # for each box = detected face:
@@ -104,7 +104,7 @@ def vid_recognise(query: Query, client) -> Answer:
         processed_frames.append(processed_frame)
         
         # testing condition, just for i first frames   
-        if i > 1000:
+        if i > 2000:
             break
 
         i += 1
