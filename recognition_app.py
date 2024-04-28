@@ -16,8 +16,7 @@ class Query:
         self.vid_name = vid_name
         self.persons = []
         parsed_persons = json.loads(json.dumps(persons)) 
-        print("PARSED PERSONS: ")
-        print(parsed_persons)
+        print("PERSONS TO RECOGNISE: ")
         for person in parsed_persons:
             parsed_person = json.loads(json.dumps(person))
             print(parsed_person['person'])
@@ -106,8 +105,8 @@ def vid_recognise(query: Query, client) -> Answer:
         processed_frames.append(processed_frame)
         
         # testing condition, just for i first frames   
-        if i > 2000:
-            break
+        # if i > 2000:
+        #     break
 
         i += 1
             
