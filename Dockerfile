@@ -15,6 +15,6 @@ RUN pip3 install --no-cache-dir ultralytics --no-deps
 
 COPY . .
 
-EXPOSE 5000
+EXPOSE 8080
 
-CMD exec gunicorn --bind:5000 --workers 1 --threads 8 --timeout 0 app:recognition_app
+CMD exec gunicorn --bind:8080 --workers 1 --threads 8 --timeout 0 app:recognition_app
