@@ -10,7 +10,7 @@ py-cpuinfo
 pandas>=1.1.4
 seaborn>=0.11.0
 deepface
-Flask 
+flask 
 gunicorn
 pathlib
 minio
