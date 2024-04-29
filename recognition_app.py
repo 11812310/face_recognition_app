@@ -52,7 +52,6 @@ def vid_recognise(query: Query, client) -> Answer:
     def recognise_face(time_signature, image_path, target_names): 
         dfs = DeepFace.find(img_path=image_path, db_path="database", enforce_detection=False) # possibly choose different model
         if dfs and len(dfs[0]['identity']) > 0:
-            # TODO: check all detected names not just the first one detected 
             name = dfs[0]['identity'].to_string(index=False).split('/')[1]
             for target_name in target_names:
                 if name == target_name:
@@ -77,7 +76,9 @@ def vid_recognise(query: Query, client) -> Answer:
     while(capture.isOpened()):
 
         retval, frame = capture.read()
-        if retval:
+        if frame is None:
+            break
+        else:
             timestamp = capture.get(cv2.CAP_PROP_POS_MSEC)
             processed_frame = frame.copy()
             # if 1s has passed since the last detection
@@ -99,16 +100,14 @@ def vid_recognise(query: Query, client) -> Answer:
                             j += 1
                             if recognise_face(timestamp, image_path, query.persons) == True:
                                 processed_frame = mark_box(box, processed_frame)
-        else:
-            break
         
         processed_frames.append(processed_frame)
         
         # testing condition, just for i first frames   
         # if i > 2000:
-        #     break
+        #    break
 
-        i += 1
+        # i += 1
             
     fps = capture.get(cv2.CAP_PROP_FPS)
     procesessed_video_name = f"processed_app_scene_{query.vid_name}"
