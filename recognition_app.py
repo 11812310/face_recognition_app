@@ -8,6 +8,7 @@ from flask import Flask, request
 import json
 from minio import Minio
 import urllib3
+import os
 
 model = YOLO("model.pt")
 
@@ -162,6 +163,8 @@ def get_recognised():
 def healthcheck():
     return "Recognition app is up!"
 
+if __name__ == "__main__":
+   recognition_app.run(debug=False,host='0.0.0.0',port=int(os.environ.get('PORT', 5000)))
 
             
 
