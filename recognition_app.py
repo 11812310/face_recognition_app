@@ -76,9 +76,7 @@ def vid_recognise(query: Query, client) -> Answer:
     while(capture.isOpened()):
 
         retval, frame = capture.read()
-        if frame is None:
-            break
-        else:
+        if retval:
             timestamp = capture.get(cv2.CAP_PROP_POS_MSEC)
             processed_frame = frame.copy()
             # if 1s has passed since the last detection
@@ -100,14 +98,16 @@ def vid_recognise(query: Query, client) -> Answer:
                             j += 1
                             if recognise_face(timestamp, image_path, query.persons) == True:
                                 processed_frame = mark_box(box, processed_frame)
+        else:
+            break
         
         processed_frames.append(processed_frame)
         
         # testing condition, just for i first frames   
-        # if i > 2000:
-        #    break
+        if i > 6000:
+            break
 
-        # i += 1
+        i += 1
             
     fps = capture.get(cv2.CAP_PROP_FPS)
     procesessed_video_name = f"processed_app_scene_{query.vid_name}"
