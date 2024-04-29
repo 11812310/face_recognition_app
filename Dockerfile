@@ -17,4 +17,4 @@ COPY . .
 
 EXPOSE 5000
 
-CMD ["gunicorn", "--workers", "1", "threads", "8", "--bind", ":5000", "--timeout", "0", "app:recognition_app"]
+CMD ["gunicorn", "--workers", "1", "threads", "8", "--bind", ":5000", "--timeout", "0", "recognition_app:recognition_app"]
