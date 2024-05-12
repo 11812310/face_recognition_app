@@ -80,14 +80,14 @@ def vid_recognise(query: Query, client) -> Answer:
         if retval:
             timestamp = capture.get(cv2.CAP_PROP_POS_MSEC)
             processed_frame = frame.copy()
-            # if 1s has passed since the last detection
-            if (timestamp - timestamp_last_detection > 1000 or timestamp - timestamp_last_recognition > 2500):
+            # if 4s have passed since the last detection
+            if (timestamp - timestamp_last_detection > 4000 or timestamp - timestamp_last_recognition > 10000):
                     timestamp_last_detection = timestamp
                     # detect faces
                     results_frame = model(frame)
                     print(len(results_frame[0].boxes))
-                    # if the number of detected faces has changed since last detection or if 2.5s have passed since last recognition
-                    if (len(results_frame[0].boxes) != last_detection_no or timestamp - timestamp_last_recognition > 2500):
+                    # if the number of detected faces has changed since last detection or if 10s have passed since last recognition
+                    if (len(results_frame[0].boxes) != last_detection_no or timestamp - timestamp_last_recognition > 10000):
                         last_detection_no = len(results_frame[0].boxes)
                         timestamp_last_recognition = timestamp
                         # for each box = detected face:
@@ -98,16 +98,11 @@ def vid_recognise(query: Query, client) -> Answer:
                             save_one_box(box.xyxy, frame, file=Path(f'./temp/frame{i}_face{j}.jpg'), BGR=True)
                             if recognise_face(timestamp, image_path, query.persons) == True:
                                 processed_frame = mark_box(box, processed_frame)
-                            os.remove(image_path)
                             j += 1
         else:
             break
         
         processed_frames.append(processed_frame)
-        
-        # testing condition, just for i first frames   
-        if i > 6000:
-            break
 
         i += 1
             
