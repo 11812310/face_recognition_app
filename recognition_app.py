@@ -61,11 +61,17 @@ def vid_recognise(query: Query, client) -> Answer:
                     return True
             return False
 
-    logfile_name = f"logfile_debug_processed_scene_{query.vid_name}"
+    logfile_name = f"logfile_app_processed_scene_{query.vid_name}"
     for person in query.persons:
         logfile_name += f"_{person}"
     logfile_path = logfile_name + ".txt"
     log = open(f"{logfile_path}", "w") 
+
+    logfile_name_debug = f"logfile_debug_processed_scene_{query.vid_name}"
+    for person in query.persons:
+        logfile_path_debug += f"_{person}"
+    logfile_path_debug = logfile_name_debug + ".txt"
+    log_debug = open(f"{logfile_path_debug}", "w") 
 
     processed_frames = []
     i = 0
@@ -104,9 +110,12 @@ def vid_recognise(query: Query, client) -> Answer:
 
         
         processed_frames.append(processed_frame)
-
+        if(i%100):
+            log_debug.write(f"{i} frames appended\n")
+            client.fput_object("logfiles-bucket", logfile_path_debug, logfile_path_debug)
         i += 1
 
+    log_debug.close()
     log.close()
     # TODO: check if the bucket exists and create it if it doesn't
     client.fput_object("logfiles-bucket", logfile_path, logfile_path)
