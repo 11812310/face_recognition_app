@@ -61,7 +61,7 @@ def vid_recognise(query: Query, client) -> Answer:
                     return True
             return False
 
-    logfile_name = f"logfile_app_processed_scene_{query.vid_name}"
+    logfile_name = f"logfile_debug_processed_scene_{query.vid_name}"
     for person in query.persons:
         logfile_name += f"_{person}"
     logfile_path = logfile_name + ".txt"
@@ -106,7 +106,11 @@ def vid_recognise(query: Query, client) -> Answer:
         processed_frames.append(processed_frame)
 
         i += 1
-            
+
+    log.close()
+    # TODO: check if the bucket exists and create it if it doesn't
+    client.fput_object("logfiles-bucket", logfile_path, logfile_path)
+
     fps = capture.get(cv2.CAP_PROP_FPS)
     procesessed_video_name = f"processed_app_scene_{query.vid_name}"
     for person in query.persons:
@@ -120,10 +124,6 @@ def vid_recognise(query: Query, client) -> Answer:
     processed_video.release()
     # TODO: check if the bucket exists and create it if it doesn't
     client.fput_object("processed-videos-bucket", procesessed_video_path, procesessed_video_path)
-
-    log.close()
-    # TODO: check if the bucket exists and create it if it doesn't
-    client.fput_object("logfiles-bucket", logfile_path, logfile_path)
 
     answer = Answer(procesessed_video_path, logfile_path)
 
