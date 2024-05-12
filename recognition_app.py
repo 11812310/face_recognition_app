@@ -77,7 +77,9 @@ def vid_recognise(query: Query, client) -> Answer:
     while(capture.isOpened()):
 
         retval, frame = capture.read()
-        if retval:
+        if frame is None:
+            break
+        else:
             timestamp = capture.get(cv2.CAP_PROP_POS_MSEC)
             processed_frame = frame.copy()
             # if 4s have passed since the last detection
@@ -99,8 +101,7 @@ def vid_recognise(query: Query, client) -> Answer:
                             if recognise_face(timestamp, image_path, query.persons) == True:
                                 processed_frame = mark_box(box, processed_frame)
                             j += 1
-        else:
-            break
+
         
         processed_frames.append(processed_frame)
 
