@@ -56,7 +56,7 @@ def vid_recognise(query: Query, client) -> Answer:
             name = dfs[0]['identity'].to_string(index=False).split('/')[1]
             for target_name in target_names:
                 if name == target_name:
-                    # print(name)
+                    print(name)
                     log.write(f"{time_signature}: {name} detected \n")
                     return True
             return False
@@ -85,7 +85,7 @@ def vid_recognise(query: Query, client) -> Answer:
                     timestamp_last_detection = timestamp
                     # detect faces
                     results_frame = model(frame)
-                    # print(len(results_frame[0].boxes))
+                    print(len(results_frame[0].boxes))
                     # if the number of detected faces has changed since last detection or if 2.5s have passed since last recognition
                     if (len(results_frame[0].boxes) != last_detection_no or timestamp - timestamp_last_recognition > 2500):
                         last_detection_no = len(results_frame[0].boxes)
@@ -96,9 +96,10 @@ def vid_recognise(query: Query, client) -> Answer:
                             # save cropped face as image
                             image_path = Path(f'./temp/frame{i}_face{j}.jpg')
                             save_one_box(box.xyxy, frame, file=Path(f'./temp/frame{i}_face{j}.jpg'), BGR=True)
-                            j += 1
                             if recognise_face(timestamp, image_path, query.persons) == True:
                                 processed_frame = mark_box(box, processed_frame)
+                            os.remove(image_path)
+                            j += 1
         else:
             break
         
