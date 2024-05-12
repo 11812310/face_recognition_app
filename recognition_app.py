@@ -69,7 +69,7 @@ def vid_recognise(query: Query, client) -> Answer:
 
     logfile_name_debug = f"logfile_debug_processed_scene_{query.vid_name}"
     for person in query.persons:
-        logfile_path_debug += f"_{person}"
+        logfile_name_debug += f"_{person}"
     logfile_path_debug = logfile_name_debug + ".txt"
     log_debug = open(f"{logfile_path_debug}", "w") 
 
