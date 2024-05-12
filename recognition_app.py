@@ -110,7 +110,7 @@ def vid_recognise(query: Query, client) -> Answer:
 
         
         processed_frames.append(processed_frame)
-        if(i%100):
+        if(i % 100 == 0):
             log_debug.write(f"{i} frames appended\n")
             client.fput_object("logfiles-bucket", logfile_path_debug, logfile_path_debug)
         i += 1
