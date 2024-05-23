@@ -7,8 +7,6 @@ from minio import Minio
 import urllib3
 import os
 
-model = YOLO("model.pt")
-
 class Query:
     def __init__(self, vid_name, recognitions):
         self.vid_name = vid_name
