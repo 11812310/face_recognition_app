@@ -1,12 +1,12 @@
 from pathlib import Path
-import torch
-import cv2
 from flask import Flask, request
 import json
 from minio import Minio
 import urllib3
 import os
 
+#TODO: pottentialy also parse detections json and log them to another file
+#TODO: also, potentially log statistics based on both those jsons to a third file
 class Query:
     def __init__(self, vid_name, persons, recognitions):
         self.vid_name = vid_name
@@ -34,57 +34,28 @@ class Recognition:
             sort_keys=True, indent=4) 
 
 class Answer:
-    def __init__(self, output_vid_name):
-        self.output_vid_name = output_vid_name
+    def __init__(self, logfile_name):
+        self.logfile_name = logfile_name
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__, 
             sort_keys=True, indent=4) 
 
-def vid_mark(query: Query, client) -> Answer:
+def log(query: Query, client) -> Answer:
     
-    # download the video on which the recognition will run from minio and save it locally
-    vid_path = f"{query.vid_name}.mp4"
-    client.fget_object("original-videos-bucket", vid_path, vid_path)
-
-    capture = cv2.VideoCapture(vid_path)
-
-    if (capture.isOpened() == False):
-        return("Video hasn't opened properly")
-
-    def mark_box(box, fr):
-        top_left_corner = (int(box.xyxy.tolist()[0][0]), int(box.xyxy.tolist()[0][1]))
-        bottom_right_corner = (int(box.xyxy.tolist()[0][2]), int(box.xyxy.tolist()[0][3]))
-        red = (0, 0, 255)
-        thickness = 2
-        cv2.rectangle(fr, top_left_corner, bottom_right_corner, red, thickness)
-        return fr 
-
-    i = 0
-    next_rec = 0
-    fps = capture.get(cv2.CAP_PROP_FPS)
-    procesessed_video_name = f"processed_app_scene_{query.vid_name}"
+    logfile_name = f"logfile_app_processed_scene_{query.vid_name}"
     for person in query.persons:
-        procesessed_video_name += f"_{person}"
-    procesessed_video_path = procesessed_video_name + ".mp4"
-    processed_video = cv2.VideoWriter(procesessed_video_path, cv2.VideoWriter_fourcc(*'MP4V'), fps, (1280,720))
-    
-    # for each scene
-    while(capture.isOpened()):
-        retval, frame = capture.read()
-        if retval:
-            break
-        else:
-            while i == query.recognitions[next_rec].frame_no:
-                mark_box(frame, query.recognitions[next_rec].box)
-                next_recognition += 1
-            processed_video.write(frame)
-            i += 1
+        logfile_name += f"_{person}"
+    logfile_path = logfile_name + ".txt"
+    log = open(f"{logfile_path}", "w") 
 
-    processed_video.release()
+    for recognition in Query.recogitions:
+        log.write(f"{recognition.timestamp}: {recognition.target_persons_name} detected \n")
+
+    log.close()
     # TODO: check if the bucket exists and create it if it doesn't
-    client.fput_object("processed-videos-bucket", procesessed_video_path, procesessed_video_path)
+    client.fput_object("logfiles-bucket", logfile_path, logfile_path)
 
-    answer = Answer(procesessed_video_path)
+    answer = Answer(logfile_path)
 
     return(answer)
 
@@ -106,21 +77,21 @@ def setup_minio():
     return client
 
 minio_client = setup_minio()
-marking = Flask(__name__)
+logging = Flask(__name__)
 
-@marking.route('/mark', methods=['GET'])
-def get_marked(): 
+@logging.route('/log', methods=['GET'])
+def get_logged(): 
     data = request.get_json()
     query = Query(data["vid_name"], data["recognitions"]) #TODO: adjust the recognition JSON
-    marked = vid_mark(query, minio_client)
+    marked = log(query, minio_client)
     return marked.toJSON()
 
-@marking.route("/health")
+@logging.route("/health")
 def healthcheck():
-    return "Marking function is available!"
+    return "Logging function is available!"
 
 if __name__ == "__main__":
-   marking.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+   logging.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
 
             
 
