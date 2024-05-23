@@ -24,9 +24,10 @@ class Query:
             self.persons.append(parsed_person['person'])
 
 class Recognition:
-    def __init__(self, frame_no, timestamp, target_persons_name):
+    def __init__(self, frame_no, timestamp, box, target_persons_name):
         self.frame_no = frame_no 
         self.timestamp = timestamp
+        self.box = box
         self.target_persons_name = target_persons_name
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__, 
@@ -51,14 +52,14 @@ def vid_recognise(query: Query, client) -> Recognitions:
         return("Video hasn't opened properly")
 
 
-    def recognise_face(frame_number, time_signature, image_path, target_names): 
+    def recognise_face(frame_number, time_signature, mark_coordinates, image_path, target_names): 
         dfs = DeepFace.find(img_path=image_path, db_path="database", enforce_detection=False) # possibly choose different model
         if dfs and len(dfs[0]['identity']) > 0:
             name = dfs[0]['identity'].to_string(index=False).split('/')[1]
             for target_name in target_names:
                 if name == target_name:
                     print(name)
-                    return Recognition(frame_number, time_signature, name)
+                    return Recognition(frame_number, time_signature, mark_coordinates, name)
             return None
 
     recognitions = []
@@ -91,7 +92,7 @@ def vid_recognise(query: Query, client) -> Recognitions:
                             # save cropped face as image
                             image_path = Path(f'./temp/frame{i}_face{j}.jpg') #TODO: check the possibility of always saving in the same file ?
                             save_one_box(box.xyxy, frame, file=Path(f'./temp/frame{i}_face{j}.jpg'), BGR=True) 
-                            recognised = recognise_face(i, timestamp, image_path, query.persons)
+                            recognised = recognise_face(i, timestamp, image_path, box, query.persons)
                             if recognised != None:
                                 recognitions.append(recognised)
                             j += 1
