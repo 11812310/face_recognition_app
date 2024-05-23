@@ -1,9 +1,6 @@
-from ultralytics import YOLO
-from ultralytics.utils.plotting import save_one_box
 from pathlib import Path
 import torch
 import cv2
-from deepface import DeepFace
 from flask import Flask, request
 import json
 from minio import Minio
