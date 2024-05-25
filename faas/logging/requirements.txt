@@ -1,0 +1,5 @@
+flask 
+gunicorn
+pathlib
+minio
+urllib3
